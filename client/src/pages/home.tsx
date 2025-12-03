@@ -1,14 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Sun, Moon } from "lucide-react";
 import type { Scores } from "@shared/schema";
 import "./home.css";
 
 export default function Home() {
   const [name, setName] = useState("");
   const [lastCalled, setLastCalled] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("theme");
+      if (saved) return saved === "dark";
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+    return false;
+  });
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDark]);
 
   const { data: queueData, isLoading: queueLoading } = useQuery<{ queue: string[] }>({
     queryKey: ["/api/queue"],
@@ -113,6 +132,17 @@ export default function Home() {
 
   return (
     <div className="app-container">
+      <div className="theme-toggle-container">
+        <button
+          className="theme-toggle"
+          onClick={() => setIsDark(!isDark)}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          data-testid="button-theme-toggle"
+        >
+          {isDark ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
+
       <div className="header">
         <img src="/baller-up.svg" alt="Baller Up logo" className="logo-img" />
         <h1 className="title">Baller Up</h1>

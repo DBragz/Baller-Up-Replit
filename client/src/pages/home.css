@@ -2,6 +2,46 @@
   max-width: 640px;
   margin: 0 auto;
   padding: 16px;
+  position: relative;
+}
+
+.theme-toggle-container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.theme-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+  background-color: #ffffff;
+  color: #213547;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  background-color: #f5f5f5;
+  transform: scale(1.05);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+:root.dark .theme-toggle {
+  background-color: #1a1a1a;
+  border-color: #333;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+:root.dark .theme-toggle:hover {
+  background-color: #2a2a2a;
 }
 
 .header {
@@ -27,10 +67,8 @@
   color: #213547;
 }
 
-@media (prefers-color-scheme: dark) {
-  .title {
-    color: rgba(255, 255, 255, 0.87);
-  }
+:root.dark .title {
+  color: rgba(255, 255, 255, 0.87);
 }
 
 .scores-container {
@@ -54,19 +92,9 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-@media (prefers-color-scheme: dark) {
-  .score-card {
-    background: #1a1a1a;
-    border-color: #333;
-  }
-
-  .score-card.good {
-    background: linear-gradient(to bottom, rgba(156, 39, 176, 0.15), rgba(156, 39, 176, 0.05));
-  }
-
-  .score-card.bad {
-    background: linear-gradient(to bottom, rgba(135, 206, 235, 0.15), rgba(135, 206, 235, 0.05));
-  }
+:root.dark .score-card {
+  background: #1a1a1a;
+  border-color: #333;
 }
 
 .score-card.good {
@@ -77,6 +105,14 @@
 .score-card.bad {
   border-color: #87ceeb;
   background: linear-gradient(to bottom, rgba(135, 206, 235, 0.05), rgba(135, 206, 235, 0.02));
+}
+
+:root.dark .score-card.good {
+  background: linear-gradient(to bottom, rgba(156, 39, 176, 0.15), rgba(156, 39, 176, 0.05));
+}
+
+:root.dark .score-card.bad {
+  background: linear-gradient(to bottom, rgba(135, 206, 235, 0.15), rgba(135, 206, 235, 0.05));
 }
 
 .score-title {
@@ -102,10 +138,8 @@
   color: #213547;
 }
 
-@media (prefers-color-scheme: dark) {
-  .score-value {
-    color: rgba(255, 255, 255, 0.87);
-  }
+:root.dark .score-value {
+  color: rgba(255, 255, 255, 0.87);
 }
 
 .score-button {
@@ -184,12 +218,10 @@
   border-color: #646cff;
 }
 
-@media (prefers-color-scheme: dark) {
-  .name-input {
-    background-color: #1a1a1a;
-    border-color: #333;
-    color: rgba(255, 255, 255, 0.87);
-  }
+:root.dark .name-input {
+  background-color: #1a1a1a;
+  border-color: #333;
+  color: rgba(255, 255, 255, 0.87);
 }
 
 .join-button {
@@ -281,11 +313,9 @@
   font-weight: 500;
 }
 
-@media (prefers-color-scheme: dark) {
-  .success-message {
-    color: #4caf50;
-    background: #1a3a1a;
-  }
+:root.dark .success-message {
+  color: #4caf50;
+  background: #1a3a1a;
 }
 
 .queue-list {
@@ -307,10 +337,8 @@
   background-color: rgba(100, 108, 255, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  .queue-item:hover {
-    background-color: rgba(100, 108, 255, 0.2);
-  }
+:root.dark .queue-item:hover {
+  background-color: rgba(100, 108, 255, 0.2);
 }
 
 .queue-item-name {
