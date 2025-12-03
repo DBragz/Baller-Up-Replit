@@ -79,7 +79,7 @@ export default function Home() {
   const nextMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/next", {});
-      return response as { next: string | null; queue: string[] };
+      return await response.json() as { next: string | null; queue: string[] };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/queue"] });
