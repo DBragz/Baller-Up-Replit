@@ -24,11 +24,24 @@ db.exec(`
 
 const ensureScores = db.prepare("SELECT id FROM scores WHERE id = 1");
 if (!ensureScores.get()) {
-  db.prepare("INSERT INTO scores (id, good_score, bad_score) VALUES (1, 0, 0)").run();
+  db.prepare(
+    "INSERT INTO scores (id, good_score, bad_score) VALUES (1, 0, 0)",
+  ).run();
 }
 
+// Ensure good_score and bad_score start at 0 by default
+db.exec(`
+  CREATE TABLE IF NOT EXISTS scores (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    good_score INTEGER NOT NULL DEFAULT 0,
+    bad_score INTEGER NOT NULL DEFAULT 0
+  )
+`);
+
 function normalizeName(name: string): string {
-  return String(name || "").trim().replace(/\s+/g, " ");
+  return String(name || "")
+    .trim()
+    .replace(/\s+/g, " ");
 }
 
 export interface IStorage {
@@ -41,23 +54,33 @@ export interface IStorage {
 }
 
 export class SQLiteStorage implements IStorage {
-  private getQueueStmt = db.prepare("SELECT name FROM queue ORDER BY position ASC");
-  private checkExistsStmt = db.prepare("SELECT 1 FROM queue WHERE LOWER(name) = LOWER(?)");
-  private getMaxPosStmt = db.prepare("SELECT COALESCE(MAX(position), 0) AS maxPos FROM queue");
+  private getQueueStmt = db.prepare(
+    "SELECT name FROM queue ORDER BY position ASC",
+  );
+  private checkExistsStmt = db.prepare(
+    "SELECT 1 FROM queue WHERE LOWER(name) = LOWER(?)",
+  );
+  private getMaxPosStmt = db.prepare(
+    "SELECT COALESCE(MAX(position), 0) AS maxPos FROM queue",
+  );
   private insertPlayerStmt = db.prepare(
-    "INSERT INTO queue (name, position, created_at) VALUES (?, ?, ?)"
+    "INSERT INTO queue (name, position, created_at) VALUES (?, ?, ?)",
   );
   private getPlayerByNameStmt = db.prepare(
-    "SELECT position FROM queue WHERE LOWER(name) = LOWER(?)"
+    "SELECT position FROM queue WHERE LOWER(name) = LOWER(?)",
   );
-  private deleteByNameStmt = db.prepare("DELETE FROM queue WHERE LOWER(name) = LOWER(?)");
-  private shiftDownStmt = db.prepare("UPDATE queue SET position = position - 1 WHERE position > ?");
+  private deleteByNameStmt = db.prepare(
+    "DELETE FROM queue WHERE LOWER(name) = LOWER(?)",
+  );
+  private shiftDownStmt = db.prepare(
+    "UPDATE queue SET position = position - 1 WHERE position > ?",
+  );
   private getFirstPlayerStmt = db.prepare(
-    "SELECT id, name, position FROM queue ORDER BY position ASC LIMIT 1"
+    "SELECT id, name, position FROM queue ORDER BY position ASC LIMIT 1",
   );
   private deleteByIdStmt = db.prepare("DELETE FROM queue WHERE id = ?");
   private getScoresStmt = db.prepare(
-    "SELECT good_score AS good, bad_score AS bad FROM scores WHERE id = 1"
+    "SELECT good_score AS good, bad_score AS bad FROM scores WHERE id = 1",
   );
 
   getQueue(): string[] {
@@ -90,7 +113,9 @@ export class SQLiteStorage implements IStorage {
       return { error: "Name is required" };
     }
 
-    const player = this.getPlayerByNameStmt.get(name) as { position: number } | undefined;
+    const player = this.getPlayerByNameStmt.get(name) as
+      | { position: number }
+      | undefined;
     if (!player) {
       return { error: "Name not found in queue" };
     }
@@ -119,7 +144,9 @@ export class SQLiteStorage implements IStorage {
   }
 
   getScores(): Scores {
-    const row = this.getScoresStmt.get() as { good: number; bad: number } | undefined;
+    const row = this.getScoresStmt.get() as
+      | { good: number; bad: number }
+      | undefined;
     return row || { good: 0, bad: 0 };
   }
 
