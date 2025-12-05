@@ -45,6 +45,7 @@ A full-stack app that allows players to:
 | POST | `/api/next` | Call next player, removes from queue |
 | GET | `/api/scores` | Get current scores |
 | POST | `/api/scores` | Update scores with `{ good?: number, bad?: number }` |
+| POST | `/api/scores/reset` | Reset both scores to 0 |
 
 ## Running the Application
 

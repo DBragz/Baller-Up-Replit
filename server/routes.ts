@@ -93,5 +93,15 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/scores/reset", (_req, res) => {
+    try {
+      const scores = storage.resetScores();
+      res.json(scores);
+    } catch (error) {
+      console.error("Error resetting scores:", error);
+      res.status(500).json({ error: "Database error" });
+    }
+  });
+
   return httpServer;
 }

@@ -121,6 +121,26 @@ export default function Home() {
     },
   });
 
+  const resetScoresMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/scores/reset", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/scores"] });
+      toast({
+        title: "Scores reset",
+        description: "Both scores have been reset to 0",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reset scores",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleJoin = () => {
     const trimmed = name.trim();
     if (trimmed) {
@@ -198,6 +218,17 @@ export default function Home() {
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="reset-container">
+        <button
+          className="reset-button"
+          onClick={() => resetScoresMutation.mutate()}
+          disabled={isLoading || (scores.good === 0 && scores.bad === 0)}
+          data-testid="button-reset-scores"
+        >
+          Reset Scores
+        </button>
       </div>
 
       <div className="name-input-container">

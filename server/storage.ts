@@ -51,6 +51,7 @@ export interface IStorage {
   nextPlayer(): { next: string | null; queue: string[] };
   getScores(): Scores;
   updateScores(update: UpdateScores): Scores;
+  resetScores(): Scores;
 }
 
 export class SQLiteStorage implements IStorage {
@@ -168,6 +169,11 @@ export class SQLiteStorage implements IStorage {
       db.prepare(sql).run(...params);
     }
 
+    return this.getScores();
+  }
+
+  resetScores(): Scores {
+    db.prepare("UPDATE scores SET good_score = 0, bad_score = 0 WHERE id = 1").run();
     return this.getScores();
   }
 }

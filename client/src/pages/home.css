@@ -195,6 +195,50 @@
   cursor: not-allowed;
 }
 
+.reset-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.reset-button {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 2px solid #888;
+  background-color: transparent;
+  color: #666;
+  font-size: 0.9em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reset-button:hover:not(:disabled) {
+  background-color: #888;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.reset-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.reset-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+:root.dark .reset-button {
+  border-color: #666;
+  color: #999;
+}
+
+:root.dark .reset-button:hover:not(:disabled) {
+  background-color: #666;
+  color: white;
+}
+
 .name-input-container {
   display: flex;
   gap: 8px;
