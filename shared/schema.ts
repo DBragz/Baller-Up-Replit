@@ -14,11 +14,16 @@ export const insertQueuePlayerSchema = z.object({
 export const scoresSchema = z.object({
   good: z.number().min(0),
   bad: z.number().min(0),
+  targetScore: z.number().min(1),
 });
 
 export const updateScoresSchema = z.object({
   good: z.number().min(0).optional(),
   bad: z.number().min(0).optional(),
+});
+
+export const updateTargetScoreSchema = z.object({
+  targetScore: z.number().min(1).max(100),
 });
 
 export type QueuePlayer = z.infer<typeof queuePlayerSchema>;

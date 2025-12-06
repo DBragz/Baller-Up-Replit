@@ -38,7 +38,8 @@ export default function Home() {
   });
 
   const queue = queueData?.queue || [];
-  const scores = scoresData || { good: 0, bad: 0 };
+  const scores = scoresData || { good: 0, bad: 0, targetScore: 21 };
+  const gameStarted = scores.good > 0 || scores.bad > 0;
 
   const joinMutation = useMutation({
     mutationFn: async (playerName: string) => {
@@ -141,6 +142,22 @@ export default function Home() {
     },
   });
 
+  const targetScoreMutation = useMutation({
+    mutationFn: async (targetScore: number) => {
+      return await apiRequest("POST", "/api/scores/target", { targetScore });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/scores"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update target score",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleJoin = () => {
     const trimmed = name.trim();
     if (trimmed) {
@@ -166,6 +183,33 @@ export default function Home() {
       <div className="header">
         <img src="/baller-up.svg" alt="Baller Up logo" className="logo-img" />
         <h1 className="title">Baller Up</h1>
+      </div>
+
+      <div className="target-score-container">
+        <label className="target-score-label" htmlFor="target-score">
+          Play to:
+        </label>
+        <input
+          id="target-score"
+          type="number"
+          className={`target-score-input ${gameStarted ? 'locked' : ''}`}
+          value={scores.targetScore}
+          onChange={(e) => {
+            const val = parseInt(e.target.value, 10);
+            if (!isNaN(val) && val >= 1 && val <= 100) {
+              targetScoreMutation.mutate(val);
+            }
+          }}
+          min={1}
+          max={100}
+          disabled={gameStarted || isLoading}
+          data-testid="input-target-score"
+        />
+        {gameStarted && (
+          <span className="target-score-locked" data-testid="text-target-locked">
+            (locked)
+          </span>
+        )}
       </div>
 
       <div className="scores-container">

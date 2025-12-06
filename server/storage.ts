@@ -2,6 +2,8 @@ import Database from "better-sqlite3";
 import path from "path";
 import type { Scores, UpdateScores } from "@shared/schema";
 
+const DEFAULT_TARGET_SCORE = 21;
+
 const dbPath = process.env.DB_FILE || path.join(process.cwd(), "data.db");
 const db = new Database(dbPath);
 
@@ -18,25 +20,24 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS scores (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     good_score INTEGER NOT NULL DEFAULT 0,
-    bad_score INTEGER NOT NULL DEFAULT 0
+    bad_score INTEGER NOT NULL DEFAULT 0,
+    target_score INTEGER NOT NULL DEFAULT 21
   )
 `);
+
+// Add target_score column if it doesn't exist (migration for existing DBs)
+try {
+  db.exec(`ALTER TABLE scores ADD COLUMN target_score INTEGER NOT NULL DEFAULT 21`);
+} catch (e) {
+  // Column already exists, ignore
+}
 
 const ensureScores = db.prepare("SELECT id FROM scores WHERE id = 1");
 if (!ensureScores.get()) {
   db.prepare(
-    "INSERT INTO scores (id, good_score, bad_score) VALUES (1, 0, 0)",
+    "INSERT INTO scores (id, good_score, bad_score, target_score) VALUES (1, 0, 0, 21)",
   ).run();
 }
-
-// Ensure good_score and bad_score start at 0 by default
-db.exec(`
-  CREATE TABLE IF NOT EXISTS scores (
-    id INTEGER PRIMARY KEY CHECK (id = 1),
-    good_score INTEGER NOT NULL DEFAULT 0,
-    bad_score INTEGER NOT NULL DEFAULT 0
-  )
-`);
 
 function normalizeName(name: string): string {
   return String(name || "")
@@ -51,6 +52,7 @@ export interface IStorage {
   nextPlayer(): { next: string | null; queue: string[] };
   getScores(): Scores;
   updateScores(update: UpdateScores): Scores;
+  updateTargetScore(targetScore: number): Scores;
   resetScores(): Scores;
 }
 
@@ -81,7 +83,7 @@ export class SQLiteStorage implements IStorage {
   );
   private deleteByIdStmt = db.prepare("DELETE FROM queue WHERE id = ?");
   private getScoresStmt = db.prepare(
-    "SELECT good_score AS good, bad_score AS bad FROM scores WHERE id = 1",
+    "SELECT good_score AS good, bad_score AS bad, target_score AS targetScore FROM scores WHERE id = 1",
   );
 
   getQueue(): string[] {
@@ -146,9 +148,9 @@ export class SQLiteStorage implements IStorage {
 
   getScores(): Scores {
     const row = this.getScoresStmt.get() as
-      | { good: number; bad: number }
+      | { good: number; bad: number; targetScore: number }
       | undefined;
-    return row || { good: 0, bad: 0 };
+    return row || { good: 0, bad: 0, targetScore: DEFAULT_TARGET_SCORE };
   }
 
   updateScores(update: UpdateScores): Scores {
@@ -169,6 +171,11 @@ export class SQLiteStorage implements IStorage {
       db.prepare(sql).run(...params);
     }
 
+    return this.getScores();
+  }
+
+  updateTargetScore(targetScore: number): Scores {
+    db.prepare("UPDATE scores SET target_score = ? WHERE id = 1").run(Math.max(1, Math.floor(targetScore)));
     return this.getScores();
   }
 

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertQueuePlayerSchema, updateScoresSchema } from "@shared/schema";
+import { insertQueuePlayerSchema, updateScoresSchema, updateTargetScoreSchema } from "@shared/schema";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -99,6 +99,21 @@ export async function registerRoutes(
       res.json(scores);
     } catch (error) {
       console.error("Error resetting scores:", error);
+      res.status(500).json({ error: "Database error" });
+    }
+  });
+
+  app.post("/api/scores/target", (req, res) => {
+    try {
+      const parsed = updateTargetScoreSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Target score must be a number between 1 and 100" });
+      }
+
+      const scores = storage.updateTargetScore(parsed.data.targetScore);
+      res.json(scores);
+    } catch (error) {
+      console.error("Error updating target score:", error);
       res.status(500).json({ error: "Database error" });
     }
   });

@@ -43,9 +43,10 @@ A full-stack app that allows players to:
 | POST | `/api/join` | Join queue with `{ name: string }` |
 | POST | `/api/leave` | Leave queue with `{ name: string }` |
 | POST | `/api/next` | Call next player, removes from queue |
-| GET | `/api/scores` | Get current scores |
+| GET | `/api/scores` | Get current scores (includes targetScore) |
 | POST | `/api/scores` | Update scores with `{ good?: number, bad?: number }` |
-| POST | `/api/scores/reset` | Reset both scores to 0 |
+| POST | `/api/scores/reset` | Reset both scores to 0 (unlocks target score) |
+| POST | `/api/scores/target` | Set target score with `{ targetScore: number }` |
 
 ## Running the Application
 
