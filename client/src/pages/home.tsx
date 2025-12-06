@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Sun, Moon } from "lucide-react";
+import confetti from "canvas-confetti";
 import type { Scores } from "@shared/schema";
 import "./home.css";
 
@@ -40,6 +41,56 @@ export default function Home() {
   const queue = queueData?.queue || [];
   const scores = scoresData || { good: 0, bad: 0, targetScore: 21 };
   const gameStarted = scores.good > 0 || scores.bad > 0;
+  const hasShownWinConfetti = useRef(false);
+
+  // Trigger confetti when a team wins
+  useEffect(() => {
+    const goodWins = scores.good >= scores.targetScore;
+    const badWins = scores.bad >= scores.targetScore;
+    
+    if ((goodWins || badWins) && !hasShownWinConfetti.current) {
+      hasShownWinConfetti.current = true;
+      
+      // Fire confetti from both sides
+      const duration = 3000;
+      const end = Date.now() + duration;
+
+      const colors = goodWins ? ['#9c27b0', '#ba68c8', '#e1bee7'] : ['#87ceeb', '#b0e0e6', '#add8e6'];
+
+      const frame = () => {
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.6 },
+          colors: colors,
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.6 },
+          colors: colors,
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
+
+      // Show winning toast
+      toast({
+        title: goodWins ? "Good Guys Win!" : "Bad Guys Win!",
+        description: `Game over! Final score: ${scores.good} - ${scores.bad}`,
+      });
+    }
+
+    // Reset the flag when scores are reset
+    if (scores.good === 0 && scores.bad === 0) {
+      hasShownWinConfetti.current = false;
+    }
+  }, [scores.good, scores.bad, scores.targetScore, toast]);
 
   const joinMutation = useMutation({
     mutationFn: async (playerName: string) => {
