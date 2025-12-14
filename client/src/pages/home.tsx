@@ -2,13 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Sun, Moon, ChevronDown, Plus, Users } from "lucide-react";
+import { Sun, Moon, ChevronDown, Plus, Users, MapPin, Lock } from "lucide-react";
 import confetti from "canvas-confetti";
 import type { Scores, Location } from "@shared/schema";
 import "./home.css";
 
 export default function Home() {
   const [name, setName] = useState("");
+  const [customLocationName, setCustomLocationName] = useState("");
   const [lastCalled, setLastCalled] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
@@ -320,15 +321,28 @@ export default function Home() {
           </div>
 
           <div className="location-options">
-            <button
-              className="create-game-button"
-              onClick={() => createLocationMutation.mutate(undefined)}
-              disabled={createLocationMutation.isPending}
-              data-testid="button-create-game"
-            >
-              <Plus size={24} />
-              <span>Create New Game</span>
-            </button>
+            <div className="create-game-form">
+              <input
+                type="text"
+                className="location-name-input"
+                placeholder="Location name (e.g., Main Gym, Court 3)"
+                value={customLocationName}
+                onChange={(e) => setCustomLocationName(e.target.value)}
+                data-testid="input-location-name"
+              />
+              <button
+                className="create-game-button"
+                onClick={() => {
+                  createLocationMutation.mutate(customLocationName.trim() || undefined);
+                  setCustomLocationName("");
+                }}
+                disabled={createLocationMutation.isPending}
+                data-testid="button-create-game"
+              >
+                <Plus size={24} />
+                <span>Create New Game</span>
+              </button>
+            </div>
 
             {locations.length > 0 && (
               <>
@@ -416,31 +430,44 @@ export default function Home() {
         <h1 className="title">Baller Up</h1>
       </div>
 
-      <div className="target-score-container">
-        <label className="target-score-label" htmlFor="target-score">
-          Play to:
-        </label>
-        <input
-          id="target-score"
-          type="number"
-          className={`target-score-input ${gameStarted ? 'locked' : ''}`}
-          value={scores.targetScore}
-          onChange={(e) => {
-            const val = parseInt(e.target.value, 10);
-            if (!isNaN(val) && val >= 1 && val <= 100) {
-              targetScoreMutation.mutate(val);
-            }
-          }}
-          min={1}
-          max={100}
-          disabled={gameStarted || isLoading}
-          data-testid="input-target-score"
-        />
-        {gameStarted && (
-          <span className="target-score-locked" data-testid="text-target-locked">
-            (locked)
-          </span>
-        )}
+      <div className="location-alias" data-testid="text-location-alias">
+        <MapPin size={16} />
+        <span>{currentLocation?.name || "Loading..."}</span>
+      </div>
+
+      <div className="game-controls-row">
+        <div className="target-score-section">
+          <label className="target-score-label" htmlFor="target-score">
+            Play to:
+          </label>
+          <div className={`target-score-wrapper ${gameStarted ? 'locked' : ''}`}>
+            <input
+              id="target-score"
+              type="number"
+              className="target-score-input"
+              value={scores.targetScore}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10);
+                if (!isNaN(val) && val >= 1 && val <= 100) {
+                  targetScoreMutation.mutate(val);
+                }
+              }}
+              min={1}
+              max={100}
+              disabled={gameStarted || isLoading}
+              data-testid="input-target-score"
+            />
+            {gameStarted && <Lock size={14} className="lock-icon" />}
+          </div>
+        </div>
+        <button
+          className="reset-button"
+          onClick={() => resetScoresMutation.mutate()}
+          disabled={isLoading || (scores.good === 0 && scores.bad === 0)}
+          data-testid="button-reset-scores"
+        >
+          Reset Scores
+        </button>
       </div>
 
       <div className="scores-container">
@@ -495,16 +522,6 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="reset-container">
-        <button
-          className="reset-button"
-          onClick={() => resetScoresMutation.mutate()}
-          disabled={isLoading || (scores.good === 0 && scores.bad === 0)}
-          data-testid="button-reset-scores"
-        >
-          Reset Scores
-        </button>
-      </div>
 
       <div className="name-input-container">
         <input

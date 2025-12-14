@@ -72,12 +72,39 @@
   color: rgba(255, 255, 255, 0.87);
 }
 
-.target-score-container {
+/* Location alias display */
+.location-alias {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(100, 108, 255, 0.1), rgba(156, 39, 176, 0.1));
+  border-radius: 20px;
+  color: #646cff;
+  font-weight: 500;
+}
+
+:root.dark .location-alias {
+  background: linear-gradient(135deg, rgba(100, 108, 255, 0.2), rgba(156, 39, 176, 0.2));
+  color: #a5b4fc;
+}
+
+/* Game controls row - Play to + Reset */
+.game-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 20px;
+  padding: 0 8px;
+}
+
+.target-score-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .target-score-label {
@@ -90,8 +117,39 @@
   color: rgba(255, 255, 255, 0.87);
 }
 
+.target-score-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.target-score-wrapper.locked {
+  opacity: 0.85;
+}
+
+.target-score-wrapper.locked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  border: 2px solid #ff9800;
+  pointer-events: none;
+  animation: pulse-lock 2s ease-in-out infinite;
+}
+
+@keyframes pulse-lock {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.lock-icon {
+  position: absolute;
+  right: -22px;
+  color: #ff9800;
+}
+
 .target-score-input {
-  width: 70px;
+  width: 65px;
   padding: 8px 12px;
   border: 2px solid #646cff;
   border-radius: 8px;
@@ -110,13 +168,12 @@
 }
 
 .target-score-input:disabled {
-  opacity: 0.7;
   cursor: not-allowed;
 }
 
-.target-score-input.locked {
-  border-color: #888;
-  background-color: #f5f5f5;
+.target-score-wrapper.locked .target-score-input {
+  border-color: #ff9800;
+  background-color: #fff8e1;
 }
 
 :root.dark .target-score-input {
@@ -125,19 +182,9 @@
   border-color: #646cff;
 }
 
-:root.dark .target-score-input.locked {
-  border-color: #555;
-  background-color: #2a2a2a;
-}
-
-.target-score-locked {
-  font-size: 0.85em;
-  color: #888;
-  font-style: italic;
-}
-
-:root.dark .target-score-locked {
-  color: #666;
+:root.dark .target-score-wrapper.locked .target-score-input {
+  border-color: #ff9800;
+  background-color: #2a2200;
 }
 
 .scores-container {
@@ -754,6 +801,43 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.create-game-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.location-name-input {
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1em;
+  font-family: inherit;
+  background-color: #ffffff;
+  color: #213547;
+  transition: all 0.2s;
+}
+
+.location-name-input:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.2);
+}
+
+.location-name-input::placeholder {
+  color: #999;
+}
+
+:root.dark .location-name-input {
+  background-color: #1a1a1a;
+  border-color: #333;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+:root.dark .location-name-input::placeholder {
+  color: #666;
 }
 
 .create-game-button {
