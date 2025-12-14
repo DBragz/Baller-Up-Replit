@@ -1,3 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
+/* Modern scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #646cff, #9c27b0);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #535bf2, #7b1fa2);
+}
+
+:root.dark ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Modern number input styling - hide default arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 .app-container {
   max-width: 640px;
   margin: 0 auto;
@@ -682,8 +720,6 @@
 }
 
 /* Location Banner Styles */
-@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
-
 .location-banner {
   position: fixed;
   top: 0;
