@@ -441,6 +441,18 @@ export default function Home() {
             Play to:
           </label>
           <div className={`target-score-wrapper ${gameStarted ? 'locked' : ''}`}>
+            <button
+              className="target-score-button"
+              onClick={() => {
+                if (scores.targetScore > 1) {
+                  targetScoreMutation.mutate(scores.targetScore - 1);
+                }
+              }}
+              disabled={gameStarted || isLoading || scores.targetScore <= 1}
+              data-testid="button-target-minus"
+            >
+              -
+            </button>
             <input
               id="target-score"
               type="number"
@@ -457,6 +469,18 @@ export default function Home() {
               disabled={gameStarted || isLoading}
               data-testid="input-target-score"
             />
+            <button
+              className="target-score-button"
+              onClick={() => {
+                if (scores.targetScore < 100) {
+                  targetScoreMutation.mutate(scores.targetScore + 1);
+                }
+              }}
+              disabled={gameStarted || isLoading || scores.targetScore >= 100}
+              data-testid="button-target-plus"
+            >
+              +
+            </button>
             {gameStarted && <Lock size={14} className="lock-icon" />}
           </div>
         </div>

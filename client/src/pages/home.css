@@ -159,6 +159,7 @@ input[type="number"] {
   position: relative;
   display: flex;
   align-items: center;
+  gap: 6px;
 }
 
 .target-score-wrapper.locked {
@@ -181,9 +182,39 @@ input[type="number"] {
 }
 
 .lock-icon {
-  position: absolute;
-  right: -22px;
+  margin-left: 6px;
   color: #ff9800;
+}
+
+.target-score-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid #646cff;
+  background-color: #646cff;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.target-score-button:hover:not(:disabled) {
+  background-color: #535bf2;
+  border-color: #535bf2;
+  transform: scale(1.05);
+}
+
+.target-score-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.target-score-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .target-score-input {
