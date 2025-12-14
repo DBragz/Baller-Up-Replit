@@ -2,14 +2,22 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, ChevronDown, Plus, Users } from "lucide-react";
 import confetti from "canvas-confetti";
-import type { Scores } from "@shared/schema";
+import type { Scores, Location } from "@shared/schema";
 import "./home.css";
 
 export default function Home() {
   const [name, setName] = useState("");
   const [lastCalled, setLastCalled] = useState<string | null>(null);
+  const [locationId, setLocationId] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("locationId");
+    }
+    return null;
+  });
+  const [showLocationDialog, setShowLocationDialog] = useState(!locationId);
+  const [showLocationSwitcher, setShowLocationSwitcher] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("theme");
@@ -30,12 +38,46 @@ export default function Home() {
     }
   }, [isDark]);
 
+  useEffect(() => {
+    if (locationId) {
+      localStorage.setItem("locationId", locationId);
+    }
+  }, [locationId]);
+
+  // Fetch current location
+  const { data: currentLocation } = useQuery<Location>({
+    queryKey: ["/api/locations", locationId],
+    enabled: !!locationId,
+  });
+
+  // Fetch all active locations
+  const { data: locationsData, refetch: refetchLocations } = useQuery<{ locations: Location[] }>({
+    queryKey: ["/api/locations"],
+  });
+
+  const locations = locationsData?.locations || [];
+
+  // Check if current location still exists
+  useEffect(() => {
+    if (locationId && locationsData && !locationsData.locations.find(l => l.id === locationId)) {
+      setLocationId(null);
+      setShowLocationDialog(true);
+      localStorage.removeItem("locationId");
+      toast({
+        title: "Game ended",
+        description: "The game you were in has ended due to inactivity",
+      });
+    }
+  }, [locationId, locationsData, toast]);
+
   const { data: queueData, isLoading: queueLoading } = useQuery<{ queue: string[] }>({
-    queryKey: ["/api/queue"],
+    queryKey: ["/api/locations", locationId, "queue"],
+    enabled: !!locationId,
   });
 
   const { data: scoresData, isLoading: scoresLoading } = useQuery<Scores>({
-    queryKey: ["/api/scores"],
+    queryKey: ["/api/locations", locationId, "scores"],
+    enabled: !!locationId,
   });
 
   const queue = queueData?.queue || [];
@@ -51,7 +93,6 @@ export default function Home() {
     if ((goodWins || badWins) && !hasShownWinConfetti.current) {
       hasShownWinConfetti.current = true;
       
-      // Fire confetti from both sides
       const duration = 3000;
       const end = Date.now() + duration;
 
@@ -79,25 +120,46 @@ export default function Home() {
       };
       frame();
 
-      // Show winning toast
       toast({
         title: goodWins ? "Good Guys Win!" : "Bad Guys Win!",
         description: `Game over! Final score: ${scores.good} - ${scores.bad}`,
       });
     }
 
-    // Reset the flag when scores are reset
     if (scores.good === 0 && scores.bad === 0) {
       hasShownWinConfetti.current = false;
     }
   }, [scores.good, scores.bad, scores.targetScore, toast]);
 
+  const createLocationMutation = useMutation({
+    mutationFn: async (customName: string | undefined) => {
+      const response = await apiRequest("POST", "/api/locations", customName ? { name: customName } : {});
+      return await response.json() as Location;
+    },
+    onSuccess: (location) => {
+      setLocationId(location.id);
+      setShowLocationDialog(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/locations"] });
+      toast({
+        title: "Game created!",
+        description: `Welcome to ${location.name}`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create game",
+        variant: "destructive",
+      });
+    },
+  });
+
   const joinMutation = useMutation({
     mutationFn: async (playerName: string) => {
-      return await apiRequest("POST", "/api/join", { name: playerName });
+      return await apiRequest("POST", `/api/locations/${locationId}/join`, { name: playerName });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/queue"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/locations", locationId, "queue"] });
       setName("");
       toast({
         title: "You're in!",
@@ -115,10 +177,10 @@ export default function Home() {
 
   const leaveMutation = useMutation({
     mutationFn: async (playerName: string) => {
-      return await apiRequest("POST", "/api/leave", { name: playerName });
+      return await apiRequest("POST", `/api/locations/${locationId}/leave`, { name: playerName });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/queue"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/locations", locationId, "queue"] });
       toast({
         title: "Left queue",
         description: "You've been removed from the queue",
@@ -135,11 +197,11 @@ export default function Home() {
 
   const nextMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/next", {});
+      const response = await apiRequest("POST", `/api/locations/${locationId}/next`, {});
       return await response.json() as { next: string | null; queue: string[] };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/queue"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/locations", locationId, "queue"] });
       if (data?.next) {
         setLastCalled(data.next);
         toast({
@@ -159,10 +221,10 @@ export default function Home() {
 
   const scoreMutation = useMutation({
     mutationFn: async (update: { good?: number; bad?: number }) => {
-      return await apiRequest("POST", "/api/scores", update);
+      return await apiRequest("POST", `/api/locations/${locationId}/scores`, update);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/scores"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/locations", locationId, "scores"] });
     },
     onError: (error: Error) => {
       toast({
@@ -175,10 +237,10 @@ export default function Home() {
 
   const resetScoresMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/scores/reset", {});
+      return await apiRequest("POST", `/api/locations/${locationId}/scores/reset`, {});
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/scores"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/locations", locationId, "scores"] });
       toast({
         title: "Scores reset",
         description: "Both scores have been reset to 0",
@@ -195,10 +257,10 @@ export default function Home() {
 
   const targetScoreMutation = useMutation({
     mutationFn: async (targetScore: number) => {
-      return await apiRequest("POST", "/api/scores/target", { targetScore });
+      return await apiRequest("POST", `/api/locations/${locationId}/scores/target`, { targetScore });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/scores"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/locations", locationId, "scores"] });
     },
     onError: (error: Error) => {
       toast({
@@ -216,10 +278,128 @@ export default function Home() {
     }
   };
 
+  const handleJoinLocation = (id: string) => {
+    setLocationId(id);
+    setShowLocationDialog(false);
+    setShowLocationSwitcher(false);
+    const loc = locations.find(l => l.id === id);
+    if (loc) {
+      toast({
+        title: "Joined game!",
+        description: `Welcome to ${loc.name}`,
+      });
+    }
+  };
+
+  const handleSwitchLocation = () => {
+    refetchLocations();
+    setShowLocationSwitcher(!showLocationSwitcher);
+  };
+
   const isLoading = joinMutation.isPending || leaveMutation.isPending || nextMutation.isPending;
+
+  // Location selection dialog
+  if (showLocationDialog) {
+    return (
+      <div className="app-container">
+        <div className="theme-toggle-container">
+          <button
+            className="theme-toggle"
+            onClick={() => setIsDark(!isDark)}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            data-testid="button-theme-toggle"
+          >
+            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+        </div>
+
+        <div className="location-dialog">
+          <div className="header">
+            <img src="/baller-up.svg" alt="Baller Up logo" className="logo-img" />
+            <h1 className="title">Baller Up</h1>
+          </div>
+
+          <div className="location-options">
+            <button
+              className="create-game-button"
+              onClick={() => createLocationMutation.mutate(undefined)}
+              disabled={createLocationMutation.isPending}
+              data-testid="button-create-game"
+            >
+              <Plus size={24} />
+              <span>Create New Game</span>
+            </button>
+
+            {locations.length > 0 && (
+              <>
+                <div className="divider">
+                  <span>or join an existing game</span>
+                </div>
+
+                <div className="existing-games">
+                  {locations.map((loc) => (
+                    <button
+                      key={loc.id}
+                      className="game-option"
+                      onClick={() => handleJoinLocation(loc.id)}
+                      data-testid={`button-join-game-${loc.id}`}
+                    >
+                      <Users size={20} />
+                      <span className="game-name">{loc.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
+      {/* Sticky Location Banner */}
+      <div className="location-banner" data-testid="banner-location">
+        <span className="location-name" data-testid="text-location-name">
+          {currentLocation?.name || "Loading..."}
+        </span>
+        <button
+          className="location-switch-button"
+          onClick={handleSwitchLocation}
+          data-testid="button-switch-location"
+        >
+          <ChevronDown size={16} />
+        </button>
+
+        {showLocationSwitcher && (
+          <div className="location-dropdown" data-testid="dropdown-locations">
+            <button
+              className="dropdown-option create"
+              onClick={() => {
+                setShowLocationSwitcher(false);
+                setShowLocationDialog(true);
+              }}
+              data-testid="button-new-game-dropdown"
+            >
+              <Plus size={16} />
+              <span>New Game</span>
+            </button>
+            {locations.filter(l => l.id !== locationId).map((loc) => (
+              <button
+                key={loc.id}
+                className="dropdown-option"
+                onClick={() => handleJoinLocation(loc.id)}
+                data-testid={`button-switch-to-${loc.id}`}
+              >
+                <Users size={16} />
+                <span>{loc.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="theme-toggle-container">
         <button
           className="theme-toggle"
