@@ -1,9 +1,21 @@
 import { z } from "zod";
 
+export const locationSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  lastActivity: z.number(),
+  createdAt: z.number(),
+});
+
+export const createLocationSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+});
+
 export const queuePlayerSchema = z.object({
   id: z.number(),
   name: z.string(),
   position: z.number(),
+  locationId: z.string(),
   createdAt: z.number(),
 });
 
@@ -26,6 +38,8 @@ export const updateTargetScoreSchema = z.object({
   targetScore: z.number().min(1).max(100),
 });
 
+export type Location = z.infer<typeof locationSchema>;
+export type CreateLocation = z.infer<typeof createLocationSchema>;
 export type QueuePlayer = z.infer<typeof queuePlayerSchema>;
 export type InsertQueuePlayer = z.infer<typeof insertQueuePlayerSchema>;
 export type Scores = z.infer<typeof scoresSchema>;
