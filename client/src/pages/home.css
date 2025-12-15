@@ -184,7 +184,7 @@ input[type="number"] {
 .target-score-section {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
 }
 
 .target-score-label {
@@ -206,12 +206,16 @@ input[type="number"] {
 
 .target-score-wrapper.locked {
   opacity: 0.85;
+  padding-left: 40px;
 }
 
 .target-score-wrapper.locked::after {
   content: '';
   position: absolute;
-  inset: 0;
+  left: 40px;
+  top: 0;
+  right: 0;
+  bottom: 0;
   border-radius: 8px;
   border: 2px solid #ff9800;
   pointer-events: none;
@@ -261,8 +265,8 @@ input[type="number"] {
 }
 
 .target-score-input {
-  width: 65px;
-  padding: 8px 12px;
+  width: 50px;
+  padding: 8px 6px;
   border: 2px solid #646cff;
   border-radius: 8px;
   font-size: 1.1em;
@@ -692,8 +696,8 @@ input[type="number"] {
   }
 
   .target-score-input {
-    width: 60px;
-    padding: 6px 10px;
+    width: 48px;
+    padding: 6px 5px;
     font-size: 1em;
   }
 
@@ -1040,8 +1044,8 @@ input[type="number"] {
   }
 
   .target-score-input {
-    width: 55px;
-    padding: 5px 8px;
+    width: 45px;
+    padding: 5px 4px;
     font-size: 0.95em;
   }
 
