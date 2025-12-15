@@ -44,10 +44,15 @@ input[type="number"] {
   position: relative;
 }
 
+.location-dialog-view {
+  padding-top: 70px;
+}
+
 .theme-toggle-container {
-  position: absolute;
+  position: fixed;
   top: 16px;
   right: 16px;
+  z-index: 999;
 }
 
 .theme-toggle {
@@ -110,23 +115,60 @@ input[type="number"] {
   color: rgba(255, 255, 255, 0.87);
 }
 
-/* Location alias display */
+/* Location alias display - now clickable */
+.location-alias-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
 .location-alias {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 16px;
-  padding: 8px 16px;
+  padding: 10px 20px;
   background: linear-gradient(135deg, rgba(100, 108, 255, 0.1), rgba(156, 39, 176, 0.1));
+  border: 2px solid rgba(100, 108, 255, 0.3);
   border-radius: 20px;
   color: #646cff;
   font-weight: 500;
+  font-size: 1em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.location-alias:hover {
+  background: linear-gradient(135deg, rgba(100, 108, 255, 0.2), rgba(156, 39, 176, 0.2));
+  border-color: rgba(100, 108, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(100, 108, 255, 0.2);
+}
+
+.location-alias:active {
+  transform: translateY(0);
+}
+
+.location-chevron {
+  transition: transform 0.2s;
+}
+
+.location-alias:hover .location-chevron {
+  transform: translateY(2px);
 }
 
 :root.dark .location-alias {
   background: linear-gradient(135deg, rgba(100, 108, 255, 0.2), rgba(156, 39, 176, 0.2));
   color: #a5b4fc;
+  border-color: rgba(100, 108, 255, 0.4);
+}
+
+:root.dark .location-alias:hover {
+  background: linear-gradient(135deg, rgba(100, 108, 255, 0.3), rgba(156, 39, 176, 0.3));
+  border-color: rgba(100, 108, 255, 0.6);
+  box-shadow: 0 2px 8px rgba(100, 108, 255, 0.3);
 }
 
 /* Game controls row - Play to + Reset */
@@ -159,7 +201,7 @@ input[type="number"] {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
 }
 
 .target-score-wrapper.locked {
@@ -182,7 +224,8 @@ input[type="number"] {
 }
 
 .lock-icon {
-  margin-left: 6px;
+  margin-left: 0;
+  margin-right: 16px;
   color: #ff9800;
 }
 
@@ -750,49 +793,7 @@ input[type="number"] {
   }
 }
 
-/* Location Banner Styles */
-.location-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: linear-gradient(135deg, #646cff 0%, #9c27b0 100%);
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-}
-
-.location-name {
-  font-family: 'Bangers', cursive;
-  font-size: 1.8em;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  letter-spacing: 2px;
-}
-
-.location-switch-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: white;
-  transition: all 0.2s;
-}
-
-.location-switch-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
-}
-
+/* Location Dropdown Styles */
 .location-dropdown {
   position: absolute;
   top: 100%;
@@ -807,6 +808,7 @@ input[type="number"] {
   overflow-x: hidden;
   margin-top: 8px;
   padding: 8px;
+  z-index: 1000;
 }
 
 :root.dark .location-dropdown {
@@ -1013,6 +1015,11 @@ input[type="number"] {
   .app-container {
     padding: 10px;
     padding-top: 56px;
+  }
+
+  .theme-toggle-container {
+    top: 10px;
+    right: 10px;
   }
 
   .logo-img {

@@ -302,7 +302,8 @@ export default function Home() {
   // Location selection dialog
   if (showLocationDialog) {
     return (
-      <div className="app-container">
+      <div className="app-container location-dialog-view">
+        {/* Theme Toggle Button - Fixed at top right */}
         <div className="theme-toggle-container">
           <button
             className="theme-toggle"
@@ -373,17 +374,33 @@ export default function Home() {
 
   return (
     <div className="app-container">
-      {/* Sticky Location Banner */}
-      <div className="location-banner" data-testid="banner-location">
-        <span className="location-name" data-testid="text-location-name">
-          {currentLocation?.name || "Loading..."}
-        </span>
+      {/* Theme Toggle Button - Fixed at top right */}
+      <div className="theme-toggle-container">
         <button
-          className="location-switch-button"
-          onClick={handleSwitchLocation}
-          data-testid="button-switch-location"
+          className="theme-toggle"
+          onClick={() => setIsDark(!isDark)}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          data-testid="button-theme-toggle"
         >
-          <ChevronDown size={16} />
+          {isDark ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
+
+      <div className="header">
+        <img src="/baller-up.svg" alt="Baller Up logo" className="logo-img" />
+        <h1 className="title">Baller Up</h1>
+      </div>
+
+      {/* Clickable Location Name with Dropdown */}
+      <div className="location-alias-wrapper">
+        <button
+          className="location-alias"
+          onClick={handleSwitchLocation}
+          data-testid="button-location-alias"
+        >
+          <MapPin size={16} />
+          <span data-testid="text-location-alias">{currentLocation?.name || "Loading..."}</span>
+          <ChevronDown size={16} className="location-chevron" />
         </button>
 
         {showLocationSwitcher && (
@@ -412,27 +429,6 @@ export default function Home() {
             ))}
           </div>
         )}
-      </div>
-
-      <div className="theme-toggle-container">
-        <button
-          className="theme-toggle"
-          onClick={() => setIsDark(!isDark)}
-          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          data-testid="button-theme-toggle"
-        >
-          {isDark ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-      </div>
-
-      <div className="header">
-        <img src="/baller-up.svg" alt="Baller Up logo" className="logo-img" />
-        <h1 className="title">Baller Up</h1>
-      </div>
-
-      <div className="location-alias" data-testid="text-location-alias">
-        <MapPin size={16} />
-        <span>{currentLocation?.name || "Loading..."}</span>
       </div>
 
       <div className="game-controls-row">
