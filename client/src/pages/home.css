@@ -48,6 +48,23 @@ input[type="number"] {
   padding-top: 70px;
 }
 
+.local-time-container {
+  position: fixed;
+  top: 20px;
+  left: 16px;
+  z-index: 999;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: rgba(33, 53, 71, 0.45);
+  pointer-events: none;
+  user-select: none;
+}
+
+:root.dark .local-time-container {
+  color: rgba(255, 255, 255, 0.3);
+}
+
 .theme-toggle-container {
   position: fixed;
   top: 16px;

@@ -27,6 +27,7 @@ export default function Home() {
     }
     return false;
   });
+  const [currentTime, setCurrentTime] = useState(() => new Date());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,6 +39,11 @@ export default function Home() {
       localStorage.setItem("theme", "light");
     }
   }, [isDark]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (locationId) {
@@ -300,9 +306,15 @@ export default function Home() {
   const isLoading = joinMutation.isPending || leaveMutation.isPending || nextMutation.isPending;
 
   // Location selection dialog
+  const formattedTime = currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
   if (showLocationDialog) {
     return (
       <div className="app-container location-dialog-view">
+        {/* Local time - Fixed at top left */}
+        <div className="local-time-container" data-testid="text-local-time">
+          {formattedTime}
+        </div>
         {/* Theme Toggle Button - Fixed at top right */}
         <div className="theme-toggle-container">
           <button
@@ -375,6 +387,11 @@ export default function Home() {
   return (
     <div className="app-container">
       {/* Theme Toggle Button - Fixed at top right */}
+      {/* Local time - Fixed at top left */}
+      <div className="local-time-container" data-testid="text-local-time">
+        {formattedTime}
+      </div>
+
       <div className="theme-toggle-container">
         <button
           className="theme-toggle"
